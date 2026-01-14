@@ -1,0 +1,32 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<h2 class="text-xl font-semibold mb-6">Marks Overview</h2>
+
+<div class="grid md:grid-cols-2 gap-6">
+    {% for item in data %}
+        <div class="bg-gray-800 p-5 rounded">
+            <h3 class="font-semibold mb-2">
+                {{ item.course.name }}
+            </h3>
+
+            <p class="text-sm text-gray-400">
+                Mid-1: {{ item.mark.mid1 }} |
+                Mid-2: {{ item.mark.mid2 }} |
+                Presentation: {{ item.mark.presentation }}
+            </p>
+
+            <p class="mt-2 text-lg font-semibold">
+                Total: {{ item.mark.total }}
+            </p>
+
+            <a href="{% url 'edit_marks' item.course.id %}"
+               class="inline-block mt-3 text-blue-400 text-sm">
+               Edit Marks
+            </a>
+        </div>
+    {% empty %}
+        <p class="text-gray-400">No courses available.</p>
+    {% endfor %}
+</div>
+{% endblock %}

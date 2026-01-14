@@ -1,0 +1,55 @@
+<aside class="w-64 bg-gray-800 border-r border-gray-700 hidden md:block">
+    <div class="p-6 text-xl font-bold">
+        🎓 Tracker
+    </div>
+
+    <nav class="px-4 space-y-2">
+        <a href="{% url 'dashboard' %}"
+           class="block px-4 py-2 rounded hover:bg-gray-700">
+           Dashboard
+        </a>
+
+        <a href="{% url 'tomorrow_classes' %}"
+            class="block px-4 py-2 rounded hover:bg-gray-700">
+            Tomorrow’s Classes
+         </a>
+
+         <a href="{% url 'mark_attendance' %}"
+            class="block px-4 py-2 rounded hover:bg-gray-700">
+            Mark Attendance
+         </a>
+
+         <a href="{% url 'attendance_stats' %}"
+            class="block px-4 py-2 rounded hover:bg-gray-700">
+            Attendance Stats
+         </a>
+
+         <a href="{% url 'smart_attendance' %}"
+            class="block px-4 py-2 rounded hover:bg-gray-700">
+            Smart Attendance
+         </a>
+
+
+        <a href="{% url 'semester_list' %}"
+           class="block px-4 py-2 rounded hover:bg-gray-700">
+           Semesters
+        </a>
+
+        <a href="{% url 'course_list' %}"
+           class="block px-4 py-2 rounded hover:bg-gray-700">
+           Courses
+        </a>
+
+         <a href="{% url 'marks_overview' %}"
+            class="block px-4 py-2 rounded hover:bg-gray-700">
+            Marks
+         </a>
+
+         <a href="{% url 'file_hub' %}"
+            class="block px-4 py-2 rounded hover:bg-gray-700">
+            Files
+         </a>
+
+        
+    </nav>
+</aside>

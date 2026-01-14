@@ -1,0 +1,46 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<h2 class="text-xl font-semibold mb-6">Mark Attendance</h2>
+
+<div class="space-y-4">
+    {% for s in sessions %}
+        <div class="bg-gray-800 p-4 rounded flex justify-between items-center">
+            <div>
+                <h3 class="font-semibold">{{ s.course.name }}</h3>
+                <p class="text-sm text-gray-400">
+                    {{ s.date }} • {{ s.start_time }}
+                </p>
+            </div>
+
+            <div class="flex gap-3 text-sm">
+                <form method="post" action="{% url 'update_attendance_status' s.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="completed">
+                    <button class="text-green-400 hover:underline">
+                        Attended
+                    </button>
+                </form>
+
+                <form method="post" action="{% url 'update_attendance_status' s.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="cancelled">
+                    <button class="text-red-400 hover:underline">
+                        Cancelled
+                    </button>
+                </form>
+
+                <form method="post" action="{% url 'update_attendance_status' s.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="no_attendance">
+                    <button class="text-yellow-400 hover:underline">
+                        No Attendance
+                    </button>
+                </form>
+            </div>
+        </div>
+    {% empty %}
+        <p class="text-gray-400">No classes pending attendance.</p>
+    {% endfor %}
+</div>
+{% endblock %}

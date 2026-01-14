@@ -1,0 +1,25 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div class="flex justify-between mb-6">
+    <h2 class="text-xl font-semibold">Semesters</h2>
+    <a href="{% url 'semester_create' %}"
+       class="bg-blue-600 px-4 py-2 rounded">Add Semester</a>
+</div>
+
+<div class="space-y-4">
+    {% for s in semesters %}
+        <div class="bg-gray-800 p-4 rounded flex justify-between">
+            <div>
+                <h3 class="font-semibold">{{ s.name }}</h3>
+                <p class="text-sm text-gray-400">
+                    {{ s.start_date }} → {{ s.end_date }}
+                </p>
+            </div>
+            <a href="{% url 'semester_delete' s.id %}" class="text-red-400">Delete</a>
+        </div>
+    {% empty %}
+        <p class="text-gray-400">No semesters added.</p>
+    {% endfor %}
+</div>
+{% endblock %}

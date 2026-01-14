@@ -1,0 +1,27 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<h2 class="text-xl font-semibold mb-6">Attendance Stats</h2>
+
+<div class="grid md:grid-cols-2 gap-6">
+    {% for s in stats %}
+        <div class="bg-gray-800 p-5 rounded">
+            <h3 class="font-semibold mb-2">{{ s.course.name }}</h3>
+
+            <p class="text-sm text-gray-400">
+                {{ s.attended }} / {{ s.total }} classes attended
+            </p>
+
+            <div class="mt-3 bg-gray-700 rounded h-2">
+                <div class="bg-blue-500 h-2 rounded"
+                     style="width: {{ s.percentage|floatformat:0 }}%">
+                </div>
+            </div>
+
+            <p class="mt-2 text-sm">
+                Attendance: <strong>{{ s.percentage }}%</strong>
+            </p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

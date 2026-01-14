@@ -1,0 +1,23 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div class="flex justify-between mb-6">
+    <h2 class="text-xl font-semibold">Courses</h2>
+    <a href="{% url 'course_create' %}"
+       class="bg-blue-600 px-4 py-2 rounded">Add Course</a>
+</div>
+
+<div class="grid gap-4 md:grid-cols-2">
+    {% for c in courses %}
+        <div class="bg-gray-800 p-5 rounded">
+            <h3 class="font-semibold">{{ c.name }}</h3>
+            <p class="text-sm text-gray-400">{{ c.teacher_name }}</p>
+            <p class="text-xs text-gray-500">{{ c.semester.name }}</p>
+            <a href="{% url 'course_delete' c.id %}"
+               class="text-red-400 text-sm mt-2 inline-block">Delete</a>
+        </div>
+    {% empty %}
+        <p class="text-gray-400">No courses added.</p>
+    {% endfor %}
+</div>
+{% endblock %}

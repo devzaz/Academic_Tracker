@@ -1,0 +1,100 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+
+<!-- ================= PAGE HEADER ================= -->
+<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+    <h2 class="text-2xl font-semibold text-white">
+        📂 File Hub
+    </h2>
+
+    <a href="{% url 'create_folder' %}"
+       class="inline-flex items-center justify-center
+              bg-blue-600 text-white px-4 py-2.5 rounded-lg
+              text-sm font-medium hover:bg-blue-500 transition">
+        + Create Folder
+    </a>
+</div>
+
+<!-- ================= FILTER ================= -->
+<div class="mb-6 max-w-xs">
+    <form method="get">
+        <select name="category"
+                onchange="this.form.submit()"
+                class="w-full bg-gray-800 text-gray-200
+                       border border-gray-700 rounded-lg
+                       px-3 py-2 text-sm
+                       focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">All Categories</option>
+            {% for c in categories %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+<!-- ================= FOLDERS GRID ================= -->
+<div class="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+
+    {% for folder in folders %}
+        <div class="relative group">
+
+            <!-- Folder Card -->
+            <a href="{% url 'folder_view' folder.id %}"
+               class="block bg-gray-800 p-6 rounded-xl shadow
+                      hover:bg-gray-700 hover:shadow-xl transition
+                      focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="text-2xl">📁</span>
+                    <p class="text-lg font-semibold text-white truncate">
+                        {{ folder.name }}
+                    </p>
+                </div>
+
+                <p class="text-sm text-gray-400">
+                    {{ folder.files.count }}
+                    file{{ folder.files.count|pluralize }}
+                    • {{ folder.total_size|filesizeformat }}
+                </p>
+            </a>
+
+            <!-- Actions -->
+            <div class="absolute top-3 right-3 flex items-center gap-1
+                        bg-gray-900/80 backdrop-blur
+                        rounded-lg px-2 py-1
+                        opacity-0 group-hover:opacity-100 transition">
+
+                <!-- Rename -->
+                <a href="{% url 'edit_folder' folder.id %}"
+                onclick="event.stopPropagation();"
+                class="px-2 py-1 text-xs font-medium text-blue-400
+                        rounded hover:bg-gray-700 hover:text-blue-300 transition">
+                    Rename
+                </a>
+
+                <!-- Delete -->
+                <form method="post"
+                    action="{% url 'delete_folder' folder.id %}"
+                    onsubmit="event.stopPropagation(); return confirm('Delete this folder and all its files?');">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="px-2 py-1 text-xs font-medium text-red-400
+                                rounded hover:bg-gray-700 hover:text-red-300 transition">
+                        Delete
+                    </button>
+                </form>
+
+            </div>
+
+
+        </div>
+    {% empty %}
+        <div class="col-span-full text-center text-gray-400 py-12">
+            No folders created yet.
+        </div>
+    {% endfor %}
+
+</div>
+
+{% endblock %}
