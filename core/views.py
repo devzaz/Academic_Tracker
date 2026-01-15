@@ -12,7 +12,9 @@ from .models import (
     StoredFile, 
     Folder, 
     FileCategory,
-    Assessment
+    Assessment,
+    CalendarEvent,
+    User
     )
 
 from .forms import (
@@ -22,7 +24,9 @@ from .forms import (
     CourseMarkForm, 
     FileUploadForm, 
     FolderForm,
-    AssessmentForm
+    AssessmentForm,
+    CalendarEventForm,
+    SignupForm
     )
 
 from datetime import date, timedelta
@@ -38,6 +42,31 @@ from django.views.decorators.http import require_POST
 
 class UserLoginView(LoginView):
     template_name = 'auth/login.html'
+
+
+
+class UserLoginView(LoginView):
+    template_name = 'auth/login.html'
+
+    def form_valid(self, form):
+        user = form.get_user()
+        if not user.is_approved:
+            return render(
+                self.request,
+                'auth/pending.html'
+            )
+        return super().form_valid(form)
+
+
+
+@login_required
+def approve_user(request, user_id):
+    if request.user.is_superuser:
+        user = User.objects.get(id=user_id)
+        user.is_approved = True
+        user.save()
+    return redirect('approve_users')
+
 
 @login_required
 def dashboard(request):
@@ -84,6 +113,33 @@ def dashboard(request):
         'semester_courses': semester_courses
     })
     return render(request, 'dashboard.html')
+
+
+def signup(request):
+    form = SignupForm(request.POST or None)
+
+    if form.is_valid():
+        user = form.save(commit=False)
+        user.is_active = True
+        user.is_approved = False
+        user.save()
+        return render(request, 'auth/pending.html')
+
+    return render(request, 'auth/signup.html', {'form': form})
+
+
+
+@login_required
+def approve_users(request):
+    if not request.user.is_superuser:
+        return redirect('dashboard')
+
+    users = User.objects.filter(is_approved=False)
+
+    return render(request, 'admin/approve_users.html', {
+        'users': users
+    })
+
 
 
 @login_required
@@ -610,3 +666,88 @@ def assessment_list(request):
         })
 
     return render(request, 'assessment/list.html', {'data': data})
+
+
+
+@login_required
+def academic_calendar(request):
+    events = []
+
+    # 🟢 Classes
+    for c in ClassSession.objects.filter(user=request.user):
+        events.append({
+            'title': c.course.name,
+            'start': f"{c.date}T{c.start_time}",
+            'color': '#22c55e',
+            'extendedProps': {'type': 'class'}
+        })
+
+    # 🔴 Exams
+    for a in Assessment.objects.filter(user=request.user):
+        events.append({
+            'title': f"{a.course.name} — {a.get_type_display()}",
+            'start': a.date.isoformat(),
+            'color': '#fca5a5',
+            'extendedProps': {'type': 'exam'}
+        })
+
+    # 🟡 Global + User Events
+    # custom_events = CalendarEvent.objects.filter(
+    #     Q(is_global=True) |
+    #     Q(user=request.user)
+    # )
+
+    custom_events = CalendarEvent.objects.filter(
+        Q(is_global=True) |
+        Q(user=request.user)
+    )
+
+    for e in custom_events:
+        event = {
+            'title': e.title,
+            'start': e.start_date.isoformat(),
+            'color': '#800080',
+            'extendedProps': {'type': e.event_type}
+        }
+
+        if e.end_date:
+            event['end'] = (e.end_date + timedelta(days=1)).isoformat()
+
+        events.append(event)
+
+    return render(request, 'calendar/main.html', {'events': events})
+
+
+
+# @login_required
+# def add_calendar_event(request):
+#     form = CalendarEventForm(request.POST or None)
+
+#     if form.is_valid():
+#         event = form.save(commit=False)
+#         event.user = request.user
+#         event.save()
+#         return redirect('academic_calendar')
+
+#     return render(request, 'calendar/form.html', {'form': form})
+
+@login_required
+def add_calendar_event(request):
+    form = CalendarEventForm(request.POST or None)
+
+    if form.is_valid():
+        event = form.save(commit=False)
+
+        if request.user.is_superuser:
+            # admin can create global events
+            event.is_global = True
+            event.user = None
+        else:
+            # normal user → personal event
+            event.user = request.user
+            event.is_global = False
+
+        event.save()
+        return redirect('academic_calendar')
+
+    return render(request, 'calendar/form.html', {'form': form})

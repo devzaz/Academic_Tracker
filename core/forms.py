@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
 from .models import (
     Semester, 
     Course, 
@@ -7,7 +8,9 @@ from .models import (
     StoredFile, 
     Folder, 
     FileCategory,
-    Assessment
+    Assessment,
+    CalendarEvent,
+    User
 )
 
 
@@ -238,6 +241,107 @@ class AssessmentForm(forms.ModelForm):
                 'class': BASE_INPUT_CLASSES
             }),
         }
+
+
+class CalendarEventForm(forms.ModelForm):
+    class Meta:
+        model = CalendarEvent
+        fields = ['title', 'event_type', 'start_date', 'end_date']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': BASE_INPUT_CLASSES,
+                'placeholder': 'e.g. Mid Term Break'
+            }),
+            'event_type': forms.Select(attrs={
+                'class': BASE_INPUT_CLASSES
+            }),
+            'start_date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': BASE_INPUT_CLASSES
+            }),
+            'end_date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': BASE_INPUT_CLASSES
+            }),
+        }
+
+
+class SignupForm(UserCreationForm):
+
+    password1 = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full px-4 py-2 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600'
+        })
+    )
+
+    password2 = forms.CharField(
+        label="Confirm password",
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full px-4 py-2 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600'
+        })
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'email',
+            'full_name',
+            'mobile',
+            'university',
+            'dob',
+            'password1',
+            'password2'
+        ]
+        widgets = {
+            'username': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600'
+            }),
+            'full_name': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600'
+            }),
+            'mobile': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600'
+            }),
+            'university': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600'
+            }),
+            'dob': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600'
+            }),
+        }
+# class SignupForm(UserCreationForm):
+#     class Meta:
+#         model = User
+#         fields = [
+#             'username',
+#             'email',
+#             'full_name',
+#             'mobile',
+#             'university',
+#             'dob',
+#             'password1',
+#             'password2'
+#         ]
+#         widgets = {
+#             'dob': forms.DateInput(attrs={'type': 'date'})
+#         }
+
+
+
+# class CalendarEventForm(forms.ModelForm):
+#     class Meta:
+#         model = CalendarEvent
+#         fields = ['title', 'event_type', 'start_date', 'end_date']
+#         widgets = {
+#             'start_date': forms.DateInput(attrs={'type': 'date'}),
+#             'end_date': forms.DateInput(attrs={'type': 'date'}),
+#         }
 
 
 # class AssessmentForm(forms.ModelForm):

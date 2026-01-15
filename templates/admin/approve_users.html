@@ -1,0 +1,29 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<h2 class="text-xl font-semibold mb-6">
+    User Approval
+</h2>
+
+<div class="space-y-4">
+    {% for user in users %}
+        <div class="bg-gray-800 p-4 rounded flex justify-between items-center">
+            <div>
+                <p class="font-medium">
+                    {{ user.full_name }} ({{ user.username }})
+                </p>
+                <p class="text-sm text-gray-400">
+                    {{ user.email }} • {{ user.mobile }}
+                </p>
+            </div>
+
+            <a href="{% url 'approve_user' user.id %}"
+               class="bg-green-600 px-4 py-1 rounded text-sm">
+                Approve
+            </a>
+        </div>
+    {% empty %}
+        <p class="text-gray-400">No pending users.</p>
+    {% endfor %}
+</div>
+{% endblock %}

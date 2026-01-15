@@ -2,6 +2,11 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('signup/', views.signup, name='signup'),
+    path('manage/users/', views.approve_users, name='approve_users'),
+    path('manage/users/<int:user_id>/approve/', views.approve_user, name='approve_user'),
+
+
     # Semester URL list
     path('semesters/', views.semester_list, name='semester_list'),
     path('semesters/add/', views.semester_create, name='semester_create'),
@@ -68,5 +73,8 @@ urlpatterns = [
     path('assessments/add/', views.assessment_create, name='assessment_create'),
     path('assessments/<int:pk>/edit/', views.assessment_edit, name='assessment_edit'),
     path('assessments/<int:pk>/delete/', views.assessment_delete, name='assessment_delete'),
+
+    path('calendar/', views.academic_calendar, name='academic_calendar'),
+    path('calendar/add/', views.add_calendar_event, name='add_calendar_event'),
 
 ]

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pending Approval</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-900 flex items-center justify-center h-screen text-gray-100">
+
+<div class="bg-gray-800 p-8 rounded-xl text-center border border-gray-700 shadow-lg max-w-sm w-full">
+
+    <h2 class="text-xl font-semibold mb-2">
+        ⏳ Approval Pending
+    </h2>
+
+    <p class="text-gray-400 mb-6">
+        Your account has been created.<br>
+        An admin must approve it before you can log in.
+    </p>
+
+    <!-- Contact Admin -->
+    <div class="bg-gray-900/60 border border-gray-700 rounded-lg p-4 mb-6">
+        <p class="text-sm text-gray-300 mb-3">
+            Need help? Contact the admin:
+        </p>
+
+        <div class="flex flex-col gap-2 text-sm">
+            <!-- Email -->
+            <a href="mailto:zubaerahmedjisan@gmail.com"
+               class="flex items-center justify-center gap-2
+                      text-blue-400 hover:underline">
+                📧 zubaerahmedjisan@gmail.com
+            </a>
+
+            <!-- WhatsApp -->
+            <a href="https://wa.me/01609581406"
+               target="_blank"
+               class="flex items-center justify-center gap-2
+                      text-green-400 hover:underline">
+                💬 WhatsApp Admin
+            </a>
+        </div>
+    </div>
+
+    <!-- Back to Login -->
+    <a href="{% url 'login' %}"
+       class="inline-block px-5 py-2.5 rounded-lg
+              bg-blue-600 text-white font-medium
+              hover:bg-blue-500 transition">
+        ← Back to Login
+    </a>
+
+</div>
+
+</body>
+</html>
