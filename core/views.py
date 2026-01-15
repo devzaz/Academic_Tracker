@@ -199,7 +199,10 @@ def update_attendance_status(request, pk):
 
     status = request.POST.get('status')
 
-    if status not in ['completed', 'cancelled', 'no_attendance']:
+    # if status not in ['completed', 'cancelled', 'no_attendance']:
+    #     return redirect('mark_attendance')
+
+    if status not in ['completed', 'absent', 'cancelled', 'no_attendance']:
         return redirect('mark_attendance')
 
     session = get_object_or_404(
@@ -475,3 +478,34 @@ def create_category_ajax(request):
         "id": category.id,
         "name": category.name
     })
+
+
+@login_required
+def semester_edit(request, pk):
+    semester = get_object_or_404(
+        Semester, pk=pk, user=request.user
+    )
+    form = SemesterForm(request.POST or None, instance=semester)
+
+    if form.is_valid():
+        form.save()
+        return redirect('semester_list')
+
+    return render(request, 'semester/form.html', {'form': form})
+
+
+@login_required
+def course_edit(request, pk):
+    course = get_object_or_404(
+        Course, pk=pk, user=request.user
+    )
+    form = CourseForm(request.POST or None, instance=course)
+    form.fields['semester'].queryset = Semester.objects.filter(
+        user=request.user
+    )
+
+    if form.is_valid():
+        form.save()
+        return redirect('course_list')
+
+    return render(request, 'course/form.html', {'form': form})

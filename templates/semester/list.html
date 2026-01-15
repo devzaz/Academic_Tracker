@@ -1,25 +1,66 @@
 {% extends 'base/base.html' %}
 
 {% block content %}
-<div class="flex justify-between mb-6">
-    <h2 class="text-xl font-semibold">Semesters</h2>
+<!-- Header -->
+<div class="flex justify-between items-center mb-8">
+    <h2 class="text-2xl font-semibold text-white">
+        Semesters
+    </h2>
+
     <a href="{% url 'semester_create' %}"
-       class="bg-blue-600 px-4 py-2 rounded">Add Semester</a>
+       class="bg-blue-600 text-white px-4 py-2.5 rounded-md text-sm font-medium
+              hover:bg-blue-500 transition">
+        + Add Semester
+    </a>
 </div>
 
+<!-- Semester List -->
 <div class="space-y-4">
     {% for s in semesters %}
-        <div class="bg-gray-800 p-4 rounded flex justify-between">
+        <div class="bg-gray-800 p-5 rounded-xl shadow
+                    flex justify-between items-center
+                    hover:bg-gray-700 transition">
+
+            <!-- Semester Info -->
             <div>
-                <h3 class="font-semibold">{{ s.name }}</h3>
+                <h3 class="text-lg font-semibold text-white">
+                    {{ s.name }}
+                </h3>
+
                 <p class="text-sm text-gray-400">
-                    {{ s.start_date }} → {{ s.end_date }}
+                    {{ s.start_date }}
+                    {% if s.end_date %}
+                        → {{ s.end_date }}
+                    {% else %}
+                        → Present
+                    {% endif %}
                 </p>
+
+                {% if s.is_active %}
+                    <span class="inline-block mt-2 text-xs font-medium
+                                 bg-green-600/20 text-green-400
+                                 px-2 py-0.5 rounded">
+                        Active
+                    </span>
+                {% endif %}
             </div>
-            <a href="{% url 'semester_delete' s.id %}" class="text-red-400">Delete</a>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-4 text-sm">
+                <a href="{% url 'semester_edit' s.id %}"
+                   class="text-blue-400 hover:underline">
+                    Edit
+                </a>
+                <a href="{% url 'semester_delete' s.id %}"
+                   class="text-red-400 hover:underline">
+                    Delete
+                </a>
+            </div>
         </div>
     {% empty %}
-        <p class="text-gray-400">No semesters added.</p>
+        <p class="text-gray-400 text-center">
+            No semesters added.
+        </p>
     {% endfor %}
 </div>
 {% endblock %}

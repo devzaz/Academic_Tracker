@@ -56,7 +56,8 @@ class Course(models.Model):
 class ClassSession(models.Model):
     STATUS_CHOICES = [
         ('planned', 'Planned'),
-        ('completed', 'Completed'),
+        ('completed', 'Attended'),
+        ('absent', 'Absent'),
         ('cancelled', 'Cancelled'),
         ('no_attendance', 'No Attendance Taken'),
     ]

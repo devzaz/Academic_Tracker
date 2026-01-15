@@ -12,7 +12,7 @@
                     {{ s.date }} • {{ s.start_time }}
                 </p>
             </div>
-
+            
             <div class="flex gap-3 text-sm">
                 <form method="post" action="{% url 'update_attendance_status' s.id %}">
                     {% csrf_token %}
@@ -21,7 +21,21 @@
                         Attended
                     </button>
                 </form>
-
+                <form method="post" action="{% url 'update_attendance_status' s.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="absent">
+                    <button class="text-orange-400 hover:underline">
+                        Absent
+                    </button>
+                </form>
+                <form method="post" action="{% url 'update_attendance_status' s.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="no_attendance">
+                    <button class="text-yellow-400 hover:underline">
+                        No Attendance
+                    </button>
+                </form>
+                
                 <form method="post" action="{% url 'update_attendance_status' s.id %}">
                     {% csrf_token %}
                     <input type="hidden" name="status" value="cancelled">
@@ -30,13 +44,8 @@
                     </button>
                 </form>
 
-                <form method="post" action="{% url 'update_attendance_status' s.id %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="status" value="no_attendance">
-                    <button class="text-yellow-400 hover:underline">
-                        No Attendance
-                    </button>
-                </form>
+
+
             </div>
         </div>
     {% empty %}

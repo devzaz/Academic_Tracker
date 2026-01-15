@@ -6,10 +6,11 @@ def attendance_summary(course):
     session = ClassSession.objects.filter(course=course)
 
     attended = session.filter(status='completed').count()
+    absent = session.filter(status='absent').count()
     ignored = session.filter(status__in=['cancelled', 'no_attendance']).count()
     planned = session.filter(status='planned').count()
 
-    total_effective = attended + planned
+    total_effective = attended + planned + absent
 
     percentage =(
         (attended / total_effective) * 100
@@ -20,6 +21,7 @@ def attendance_summary(course):
         'attended': attended,
         'planned': planned,
         'ignored': ignored,
+        'absent': absent,
         'percentage': round(percentage, 2),
         'total_effective': total_effective
     }

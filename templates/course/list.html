@@ -1,23 +1,56 @@
 {% extends 'base/base.html' %}
 
 {% block content %}
-<div class="flex justify-between mb-6">
-    <h2 class="text-xl font-semibold">Courses</h2>
+<!-- Header -->
+<div class="flex justify-between items-center mb-8">
+    <h2 class="text-2xl font-semibold text-white">
+        Courses
+    </h2>
+
     <a href="{% url 'course_create' %}"
-       class="bg-blue-600 px-4 py-2 rounded">Add Course</a>
+       class="bg-blue-600 text-white px-4 py-2.5 rounded-md text-sm font-medium
+              hover:bg-blue-500 transition">
+        + Add Course
+    </a>
 </div>
 
-<div class="grid gap-4 md:grid-cols-2">
+<!-- Courses Grid -->
+<div class="grid gap-6 sm:grid-cols-1 md:grid-cols-2">
     {% for c in courses %}
-        <div class="bg-gray-800 p-5 rounded">
-            <h3 class="font-semibold">{{ c.name }}</h3>
-            <p class="text-sm text-gray-400">{{ c.teacher_name }}</p>
-            <p class="text-xs text-gray-500">{{ c.semester.name }}</p>
-            <a href="{% url 'course_delete' c.id %}"
-               class="text-red-400 text-sm mt-2 inline-block">Delete</a>
+        <div class="bg-gray-800 p-6 rounded-xl shadow
+                    hover:bg-gray-700 transition">
+
+            <!-- Course Info -->
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold text-white">
+                    {{ c.name }}
+                </h3>
+
+                <p class="text-sm text-gray-400">
+                    {{ c.teacher_name }}
+                </p>
+
+                <p class="text-xs text-gray-500 mt-1">
+                    {{ c.semester.name }}
+                </p>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-4 text-sm">
+                <a href="{% url 'course_edit' c.id %}"
+                   class="text-blue-400 hover:underline">
+                    Edit
+                </a>
+                <a href="{% url 'course_delete' c.id %}"
+                   class="text-red-400 hover:underline">
+                    Delete
+                </a>
+            </div>
         </div>
     {% empty %}
-        <p class="text-gray-400">No courses added.</p>
+        <p class="text-gray-400 text-center col-span-full">
+            No courses added.
+        </p>
     {% endfor %}
 </div>
 {% endblock %}

@@ -53,5 +53,8 @@ urlpatterns = [
 
     path("files/category/create/", views.create_category_ajax, name="create_category_ajax"),
 
+    path('semesters/<int:pk>/edit/', views.semester_edit, name='semester_edit'),
+
+    path('courses/<int:pk>/edit/', views.course_edit, name='course_edit'),
 
 ]
