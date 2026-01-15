@@ -1,0 +1,19 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<h2 class="text-xl font-semibold mb-6">Class History</h2>
+
+<div class="grid md:grid-cols-2 gap-6">
+    {% for course in courses %}
+        <a href="{% url 'class_history_detail' course.id %}"
+           class="bg-gray-800 p-5 rounded hover:bg-gray-700 transition">
+            <h3 class="font-semibold">{{ course.name }}</h3>
+            <p class="text-sm text-gray-400">
+                {{ course.semester.name }}
+            </p>
+        </a>
+    {% empty %}
+        <p class="text-gray-400">No courses available.</p>
+    {% endfor %}
+</div>
+{% endblock %}

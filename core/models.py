@@ -219,3 +219,34 @@ def get_general_category(user):
         user=user,
         name="General"
     )[0]
+
+
+
+class Assessment(models.Model):
+    TYPE_CHOICES = [
+        ('mid1', 'Mid 1'),
+        ('mid2', 'Mid 2'),
+        ('final', 'Final Exam'),
+        ('presentation', 'Presentation'),
+        ('assignment', 'Assignment'),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='assessments'
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name='assessments'
+    )
+
+    title = models.CharField(max_length=200)
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    date = models.DateField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.course.name} - {self.title}"

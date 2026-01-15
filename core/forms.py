@@ -1,5 +1,14 @@
 from django import forms
-from .models import Semester, Course, ClassSession, CourseMark, StoredFile, Folder, FileCategory
+from .models import (
+    Semester, 
+    Course, 
+    ClassSession, 
+    CourseMark, 
+    StoredFile, 
+    Folder, 
+    FileCategory,
+    Assessment
+)
 
 
 
@@ -37,12 +46,12 @@ class SemesterForm(forms.ModelForm):
 
 
 
-BASE_INPUT_CLASSES = (
-    "w-full px-3 py-2 rounded-md "
-    "border border-gray-300 "
-    "bg-white text-black "
-    "focus:outline-none focus:ring-2 focus:ring-blue-500"
-)
+# BASE_INPUT_CLASSES = (
+#     "w-full px-3 py-2 rounded-md "
+#     "border border-gray-300 "
+#     "bg-white text-black "
+#     "focus:outline-none focus:ring-2 focus:ring-blue-500"
+# )
 
 class CourseForm(forms.ModelForm):
     class Meta:
@@ -80,12 +89,12 @@ class CourseForm(forms.ModelForm):
 
 
 
-BASE_INPUT_CLASSES = (
-    "w-full px-3 py-2 rounded-md "
-    "border border-gray-300 "
-    "bg-white text-black "
-    "focus:outline-none focus:ring-2 focus:ring-blue-500"
-)
+# BASE_INPUT_CLASSES = (
+#     "w-full px-3 py-2 rounded-md "
+#     "border border-gray-300 "
+#     "bg-white text-black "
+#     "focus:outline-none focus:ring-2 focus:ring-blue-500"
+# )
 
 class ClassSessionForm(forms.ModelForm):
     class Meta:
@@ -106,12 +115,12 @@ class ClassSessionForm(forms.ModelForm):
         }
 
 
-BASE_INPUT_CLASSES = (
-    "w-full px-3 py-2 rounded-md "
-    "border border-gray-300 "
-    "bg-white text-black "
-    "focus:outline-none focus:ring-2 focus:ring-blue-500"
-)
+# BASE_INPUT_CLASSES = (
+#     "w-full px-3 py-2 rounded-md "
+#     "border border-gray-300 "
+#     "bg-white text-black "
+#     "focus:outline-none focus:ring-2 focus:ring-blue-500"
+# )
 
 class CourseMarkForm(forms.ModelForm):
     class Meta:
@@ -142,12 +151,12 @@ class CourseMarkForm(forms.ModelForm):
 
 
 
-BASE_INPUT_CLASSES = (
-    "w-full px-3 py-2 rounded-md "
-    "border border-gray-300 "
-    "bg-white text-black "
-    "focus:outline-none focus:ring-2 focus:ring-blue-500"
-)
+# BASE_INPUT_CLASSES = (
+#     "w-full px-3 py-2 rounded-md "
+#     "border border-gray-300 "
+#     "bg-white text-black "
+#     "focus:outline-none focus:ring-2 focus:ring-blue-500"
+# )
 
 class FileUploadForm(forms.ModelForm):
     display_name = forms.CharField(
@@ -199,6 +208,45 @@ class FolderForm(forms.ModelForm):
             }),
         }
 
+
+
+
+# BASE_INPUT_CLASSES = (
+#     "w-full px-3 py-2 rounded-md "
+#     "border border-gray-300 "
+#     "bg-white text-black "
+#     "focus:outline-none focus:ring-2 focus:ring-blue-500"
+# )
+
+class AssessmentForm(forms.ModelForm):
+    class Meta:
+        model = Assessment
+        fields = ['course', 'title', 'type', 'date']
+        widgets = {
+            'course': forms.Select(attrs={
+                'class': BASE_INPUT_CLASSES
+            }),
+            'title': forms.TextInput(attrs={
+                'class': BASE_INPUT_CLASSES,
+                'placeholder': 'e.g. Midterm Exam'
+            }),
+            'type': forms.Select(attrs={
+                'class': BASE_INPUT_CLASSES
+            }),
+            'date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': BASE_INPUT_CLASSES
+            }),
+        }
+
+
+# class AssessmentForm(forms.ModelForm):
+#     class Meta:
+#         model = Assessment
+#         fields = ['course', 'title', 'type', 'date']
+#         widgets = {
+#             'date': forms.DateInput(attrs={'type': 'date'})
+#         }
 
 
 

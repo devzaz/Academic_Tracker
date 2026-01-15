@@ -4,8 +4,26 @@ from django.contrib.auth.decorators import login_required
 
 from django.shortcuts import render, redirect, get_object_or_404
 from urllib3 import request
-from .models import Semester, Course,ClassSession, CourseMark, StoredFile, Folder, FileCategory
-from .forms import SemesterForm, CourseForm,ClassSessionForm, CourseMarkForm, FileUploadForm, FolderForm
+from .models import (
+    Semester, 
+    Course,
+    ClassSession, 
+    CourseMark, 
+    StoredFile, 
+    Folder, 
+    FileCategory,
+    Assessment
+    )
+
+from .forms import (
+    SemesterForm, 
+    CourseForm,
+    ClassSessionForm, 
+    CourseMarkForm, 
+    FileUploadForm, 
+    FolderForm,
+    AssessmentForm
+    )
 
 from datetime import date, timedelta
 from django.db.models import Q, Count
@@ -509,3 +527,86 @@ def course_edit(request, pk):
         return redirect('course_list')
 
     return render(request, 'course/form.html', {'form': form})
+
+
+@login_required
+def assessment_edit(request, pk):
+    assessment = get_object_or_404(
+        Assessment, pk=pk, user=request.user
+    )
+    form = AssessmentForm(request.POST or None, instance=assessment)
+    form.fields['course'].queryset = Course.objects.filter(
+        user=request.user
+    )
+
+    if form.is_valid():
+        form.save()
+        return redirect('assessment_list')
+
+    return render(request, 'assessment/form.html', {'form': form})
+
+
+@login_required
+def assessment_delete(request, pk):
+    assessment = get_object_or_404(
+        Assessment, pk=pk, user=request.user
+    )
+    assessment.delete()
+    return redirect('assessment_list')
+
+
+@login_required
+def class_history_courses(request):
+    courses = Course.objects.filter(user=request.user)
+    return render(request, 'history/course_list.html', {
+        'courses': courses
+    })
+
+
+@login_required
+def class_history_detail(request, course_id):
+    course = get_object_or_404(
+        Course, id=course_id, user=request.user
+    )
+
+    sessions = ClassSession.objects.filter(
+        course=course
+    ).order_by('-date', '-start_time')
+
+    return render(request, 'history/course_detail.html', {
+        'course': course,
+        'sessions': sessions
+    })
+
+
+@login_required
+def assessment_create(request):
+    form = AssessmentForm(request.POST or None)
+    form.fields['course'].queryset = Course.objects.filter(user=request.user)
+
+    if form.is_valid():
+        assessment = form.save(commit=False)
+        assessment.user = request.user
+        assessment.save()
+        return redirect('assessment_list')
+
+    return render(request, 'assessment/form.html', {'form': form})
+
+
+@login_required
+def assessment_list(request):
+    today = date.today()
+    warning_date = today + timedelta(days=5)
+
+    assessments = Assessment.objects.filter(
+        user=request.user
+    ).order_by('date')
+
+    data = []
+    for a in assessments:
+        data.append({
+            'assessment': a,
+            'warning': today <= a.date <= warning_date
+        })
+
+    return render(request, 'assessment/list.html', {'data': data})

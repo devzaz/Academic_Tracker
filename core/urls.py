@@ -57,4 +57,16 @@ urlpatterns = [
 
     path('courses/<int:pk>/edit/', views.course_edit, name='course_edit'),
 
+    path('history/', views.class_history_courses, name='class_history_courses'),
+    path(
+        'history/<int:course_id>/',
+        views.class_history_detail,
+        name='class_history_detail'
+    ),
+
+    path('assessments/', views.assessment_list, name='assessment_list'),
+    path('assessments/add/', views.assessment_create, name='assessment_create'),
+    path('assessments/<int:pk>/edit/', views.assessment_edit, name='assessment_edit'),
+    path('assessments/<int:pk>/delete/', views.assessment_delete, name='assessment_delete'),
+
 ]

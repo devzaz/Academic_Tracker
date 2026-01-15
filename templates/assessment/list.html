@@ -1,0 +1,65 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<!-- Header -->
+<div class="flex justify-between items-center mb-8">
+    <h2 class="text-2xl font-semibold text-white">
+        Exam & Assignment Planner
+    </h2>
+
+    <a href="{% url 'assessment_create' %}"
+       class="bg-blue-600 text-white px-4 py-2.5 rounded-md text-sm font-medium
+              hover:bg-blue-500 transition">
+       + Add
+    </a>
+</div>
+
+<!-- Assessment List -->
+<div class="space-y-4">
+    {% for item in data %}
+        <div class="bg-gray-800 p-5 rounded-xl border
+            {% if item.warning %}
+                border-yellow-400
+            {% else %}
+                border-gray-700
+            {% endif %}
+            hover:bg-gray-700 transition">
+
+            <!-- Title + Actions -->
+            <div class="flex justify-between items-start mb-1">
+                <h3 class="text-lg font-semibold text-white">
+                    {{ item.assessment.title }}
+                </h3>
+
+                <div class="flex gap-3 text-sm">
+                    <a href="{% url 'assessment_edit' item.assessment.id %}"
+                       class="text-blue-400 hover:underline">
+                        Edit
+                    </a>
+                    <a href="{% url 'assessment_delete' item.assessment.id %}"
+                       class="text-red-400 hover:underline">
+                        Delete
+                    </a>
+                </div>
+            </div>
+
+            <!-- Meta Info -->
+            <p class="text-sm text-gray-400">
+                {{ item.assessment.course.name }} •
+                {{ item.assessment.get_type_display }} •
+                {{ item.assessment.date }}
+            </p>
+
+            {% if item.warning %}
+                <p class="text-sm text-yellow-400 mt-2 flex items-center gap-1">
+                    ⏰ Happening within 5 days
+                </p>
+            {% endif %}
+        </div>
+    {% empty %}
+        <p class="text-gray-400 text-center">
+            No assessments added.
+        </p>
+    {% endfor %}
+</div>
+{% endblock %}
