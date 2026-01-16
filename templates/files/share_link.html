@@ -1,0 +1,28 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+<div class="max-w-xl mx-auto bg-gray-800 p-6 rounded-xl text-center">
+    <h2 class="text-xl font-semibold text-white mb-4">
+        🔗 Share Link
+    </h2>
+
+    <input
+        type="text"
+        value="{{ share_url }}"
+        readonly
+        class="w-full px-3 py-2 rounded bg-gray-900
+               text-gray-200 text-sm mb-4"
+        onclick="this.select()"
+    >
+
+    <p class="text-gray-400 text-sm">
+        Anyone with this link can download the file.
+    </p>
+
+    <a href="{{ share_url }}"
+       target="_blank"
+       class="inline-block mt-4 text-blue-400 hover:underline">
+       Open link
+    </a>
+</div>
+{% endblock %}

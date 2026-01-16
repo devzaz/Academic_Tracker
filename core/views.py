@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import HttpResponse, Http404
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
 
@@ -14,7 +15,8 @@ from .models import (
     FileCategory,
     Assessment,
     CalendarEvent,
-    User
+    User,
+    ShareLink
     )
 
 from .forms import (
@@ -32,12 +34,22 @@ from .forms import (
 from datetime import date, timedelta
 from django.db.models import Q, Count
 
-from .utils import attendance_summary, missable_classes, get_general_category
+from .utils import (
+    attendance_summary, 
+    missable_classes, 
+    get_general_category,
+    create_folder_zip
+    )
 
 from django.utils import timezone
 
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+
+#for sharing files
+import zipfile
+from django.core.files.base import ContentFile
+from io import BytesIO
 
 
 class UserLoginView(LoginView):
@@ -751,3 +763,175 @@ def add_calendar_event(request):
         return redirect('academic_calendar')
 
     return render(request, 'calendar/form.html', {'form': form})
+
+
+#sharing files system
+
+
+
+
+@login_required
+def share_file(request, file_id):
+    file = get_object_or_404(
+        StoredFile,
+        id=file_id,
+        user=request.user
+    )
+
+    share, created = ShareLink.objects.get_or_create(
+        file=file,
+        user=request.user
+    )
+
+    return render(request, "files/share_link.html", {
+        "share_url": request.build_absolute_uri(
+            f"/share/{share.token}/"
+        )
+    })
+
+
+
+@login_required
+def share_folder(request, folder_id):
+    folder = get_object_or_404(
+        Folder,
+        id=folder_id,
+        user=request.user
+    )
+
+    share, created = ShareLink.objects.get_or_create(
+        folder=folder,
+        user=request.user
+    )
+
+    # 🔥 ENSURE ZIP ALWAYS EXISTS
+    if not share.zip_file:
+        zip_content = create_folder_zip(folder)
+        share.zip_file.save(
+            f"{folder.name}.zip",
+            zip_content,
+            save=True
+        )
+
+    return render(request, "files/share_link.html", {
+        "share_url": request.build_absolute_uri(
+            f"/share/{share.token}/"
+        )
+    })
+
+
+
+
+# def public_share(request, token):
+#     share = get_object_or_404(
+#         ShareLink,
+#         token=token,
+#         is_active=True
+#     )
+
+#     if share.is_expired():
+#         return HttpResponse("Link expired", status=410)
+
+#     if share.file and share.file.file:
+#         return redirect(share.file.file.url)
+
+#     if share.zip_file and share.zip_file.name:
+#         return redirect(share.zip_file.url)
+
+#     return HttpResponse("Invalid or incomplete share", status=404)
+
+# def public_share(request, token):
+#     share = get_object_or_404(
+#         ShareLink,
+#         token=token
+#     )
+
+#     if not share.is_active:
+#         return HttpResponse(
+#             "This shared link has been disabled. "
+#             "The file will be cleaned automatically.",
+#             status=410
+#         )
+
+#     if share.is_expired():
+#         return HttpResponse("Link expired", status=410)
+
+#     if share.file and share.file.file:
+#         return redirect(share.file.file.url)
+
+#     if share.zip_file:
+#         return redirect(share.zip_file.url)
+
+#     return HttpResponse("Invalid share", status=404)
+
+def public_share(request, token):
+    share = get_object_or_404(
+        ShareLink,
+        token=token
+    )
+
+    # 🔒 Deactivated link → 404 page
+    if not share.is_active:
+        raise Http404
+
+    # ⏰ Expired link → 404 page
+    if share.is_expired():
+        raise Http404
+
+    # 📄 File share
+    if share.file and share.file.file:
+        return redirect(share.file.file.url)
+
+    # 📦 Folder ZIP share
+    if share.zip_file:
+        return redirect(share.zip_file.url)
+
+    # ❌ Anything else → 404 page
+    raise Http404
+
+
+@login_required
+def my_shared_links(request):
+    shares = ShareLink.objects.filter(user=request.user)
+
+    return render(request, "files/my_shares.html", {
+        "shares": shares
+    })
+
+
+@login_required
+def disable_share(request, share_id):
+    share = get_object_or_404(
+        ShareLink,
+        id=share_id,
+        user=request.user
+    )
+
+    share.mark_inactive()
+
+    return redirect("my_shared_links")
+
+
+@login_required
+def admin_shared_links(request):
+    if not request.user.is_superuser:
+        return redirect("dashboard")
+
+    shares = ShareLink.objects.all().order_by("-created_at")
+
+    return render(request, "admin/shared_links.html", {
+        "shares": shares
+    })
+
+
+
+@login_required
+def admin_cleanup_share(request, share_id):
+    if not request.user.is_superuser:
+        return redirect("dashboard")
+
+    share = get_object_or_404(ShareLink, id=share_id)
+    share.cleanup_zip()
+
+    return redirect("admin_shared_links")
+

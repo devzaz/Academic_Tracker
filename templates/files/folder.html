@@ -85,6 +85,13 @@
                     Open
                 </a>
 
+                <a href="{% url 'share_file' f.id %}"
+                    class="text-green-400 text-sm hover:underline">
+                    Share
+                </a>
+                
+
+
                 <form method="post"
                       action="{% url 'delete_file' f.id %}"
                       onsubmit="return confirm('Delete this file permanently?');">

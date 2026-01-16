@@ -1,0 +1,60 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+  <h2 class="text-2xl font-semibold text-white mb-6">
+    🧹 Shared Files Manager
+  </h2>
+
+  {% for s in shares %}
+  <div class="bg-gray-800 p-4 rounded-lg mb-3 flex justify-between items-center">
+    <div class="min-w-0">
+      <p class="text-white text-sm truncate">
+        👤 {{ s.user.username }} —
+        {{ s.file|default:s.folder }}
+      </p>
+
+      <p class="text-xs text-gray-400 mt-1">
+        Active:
+        {% if s.is_active %}
+          <span class="text-green-400">Yes</span>
+        {% else %}
+          <span class="text-red-400">No</span>
+        {% endif %}
+        •
+        ZIP:
+        {% if s.zip_file %}
+          <span class="text-yellow-400">Exists</span>
+        {% else %}
+          <span class="text-gray-500">None</span>
+        {% endif %}
+      </p>
+    </div>
+
+    <div class="flex gap-4 shrink-0">
+      {% if s.zip_file %}
+      <a href="{% url 'admin_cleanup_share' s.id %}"
+         class="text-red-400 text-sm hover:underline"
+         onclick="return confirm('Delete ZIP file from storage?');">
+        Clean ZIP
+      </a>
+      {% endif %}
+
+      {% if s.is_active %}
+      <span class="text-xs text-green-400">
+        Active
+      </span>
+      {% else %}
+      <span class="text-xs text-gray-400">
+        Disabled
+      </span>
+      {% endif %}
+    </div>
+  </div>
+  {% empty %}
+  <p class="text-gray-400">
+    No shared files found.
+  </p>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -77,4 +77,15 @@ urlpatterns = [
     path('calendar/', views.academic_calendar, name='academic_calendar'),
     path('calendar/add/', views.add_calendar_event, name='add_calendar_event'),
 
+    #sharing file system
+    path("share/file/<int:file_id>/", views.share_file, name="share_file"),
+    path("share/folder/<int:folder_id>/", views.share_folder, name="share_folder"),
+    path("share/<uuid:token>/", views.public_share, name="public_share"),
+
+    path("shares/", views.my_shared_links, name="my_shared_links"),
+    path("shares/<int:share_id>/disable/", views.disable_share, name="disable_share"),
+
+    path("manage/shares/", views.admin_shared_links, name="admin_shared_links"),
+    path("manage/shares/<int:share_id>/cleanup/", views.admin_cleanup_share, name="admin_cleanup_share"),
+
 ]

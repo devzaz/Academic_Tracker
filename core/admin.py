@@ -5,7 +5,8 @@ from .models import (
     ClassSession,
     FileCategory, 
     User,
-    CalendarEvent)
+    CalendarEvent,
+    ShareLink)
 
 # Register your models here.
 admin.site.register(ClassSession)
@@ -14,3 +15,4 @@ admin.site.register(FileCategory)
 admin.site.register(Semester)
 admin.site.register(User)
 admin.site.register(CalendarEvent)
+admin.site.register(ShareLink)

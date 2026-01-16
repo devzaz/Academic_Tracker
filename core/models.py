@@ -296,3 +296,80 @@ class CalendarEvent(models.Model):
 
     def __str__(self):
         return self.title
+
+
+
+import uuid
+from django.utils import timezone
+
+class ShareLink(models.Model):
+    token = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="shared_links"
+    )
+
+    file = models.ForeignKey(
+        StoredFile,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE
+    )
+
+    folder = models.ForeignKey(
+        Folder,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE
+    )
+
+    zip_file = models.FileField(
+        upload_to="shared_zips/",
+        null=True,
+        blank=True
+    )
+
+    cleanup_after_hours = models.PositiveIntegerField(
+        default=24,
+        help_text="Hours after deactivation to clean ZIP"
+    )
+
+    cleaned_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+
+    def is_expired(self):
+        return self.expires_at and timezone.now() > self.expires_at
+
+    def __str__(self):
+        return f"ShareLink {self.token}"
+    
+    def mark_inactive(self):
+        """
+        Disable this share link.
+        ZIP cleanup can happen later.
+        """
+        self.is_active = False
+        self.save(update_fields=["is_active"])
+
+
+    def cleanup_zip(self):
+        """
+        Permanently remove the stored ZIP from storage.
+        """
+        if self.zip_file:
+            self.zip_file.delete(save=False)
+            self.zip_file = None
+            self.cleaned_at = timezone.now()
+            self.save(update_fields=["zip_file", "cleaned_at"])

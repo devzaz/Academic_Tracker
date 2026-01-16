@@ -1,0 +1,32 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+  <h2 class="text-2xl font-semibold text-white mb-6">
+    🧹 Shared Files Manager
+  </h2>
+
+  {% for s in shares %}
+  <div class="bg-gray-800 p-4 rounded-lg mb-3 flex justify-between items-center">
+    <div>
+      <p class="text-white text-sm">
+        {{ s.user.username }} — {{ s.file|default:s.folder }}
+      </p>
+      <p class="text-xs text-gray-400">
+        Active: {{ s.is_active }} |
+        ZIP: {{ s.zip_file|yesno:"Yes,No" }}
+      </p>
+    </div>
+
+    {% if s.zip_file %}
+    <a href="{% url 'admin_cleanup_share' s.id %}"
+       class="text-red-400 text-sm hover:underline">
+      Clean ZIP
+    </a>
+    {% endif %}
+  </div>
+  {% empty %}
+  <p class="text-gray-400">No shared files.</p>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <h2 class="text-2xl font-semibold text-white mb-6">
+    🔗 My Shared Links
+  </h2>
+
+  {% for s in shares %}
+  <div class="bg-gray-800 p-4 rounded-lg mb-3 flex justify-between items-center">
+    <div>
+      <p class="text-white text-sm">
+        {{ s.file|default:s.folder }}
+      </p>
+      <p class="text-xs text-gray-400">
+        {{ request.build_absolute_uri|slice:":0" }}/share/{{ s.token }}/
+      </p>
+      {% if not s.is_active %}
+      <p class="text-xs text-yellow-400 mt-1">
+        ⚠ This link is inactive and will be cleaned soon
+      </p>
+      {% endif %}
+    </div>
+
+    {% if s.is_active %}
+    <a href="{% url 'disable_share' s.id %}"
+       class="text-red-400 text-sm hover:underline">
+      Disable
+    </a>
+    {% endif %}
+  </div>
+  {% empty %}
+  <p class="text-gray-400">No shared links yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

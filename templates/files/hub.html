@@ -3,7 +3,7 @@
 {% block content %}
 
 <!-- ================= PAGE HEADER ================= -->
-<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+<!-- <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
     <h2 class="text-2xl font-semibold text-white">
         📂 File Hub
     </h2>
@@ -14,7 +14,30 @@
               text-sm font-medium hover:bg-blue-500 transition">
         + Create Folder
     </a>
+</div> -->
+
+<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+  <h2 class="text-2xl font-semibold text-white">
+    📂 File Hub
+  </h2>
+
+  <div class="flex gap-3">
+    <a href="{% url 'my_shared_links' %}"
+       class="inline-flex items-center justify-center
+              bg-gray-700 text-gray-200 px-4 py-2.5 rounded-lg
+              text-sm font-medium hover:bg-gray-600 transition">
+      🔗 Shared Links
+    </a>
+
+    <a href="{% url 'create_folder' %}"
+       class="inline-flex items-center justify-center
+              bg-blue-600 text-white px-4 py-2.5 rounded-lg
+              text-sm font-medium hover:bg-blue-500 transition">
+      + Create Folder
+    </a>
+  </div>
 </div>
+
 
 <!-- ================= FILTER ================= -->
 <div class="mb-6 max-w-xs">
@@ -60,32 +83,89 @@
             </a>
 
             <!-- Actions -->
-            <div class="absolute top-3 right-3 flex items-center gap-1
-                        bg-gray-900/80 backdrop-blur
-                        rounded-lg px-2 py-1
-                        opacity-0 group-hover:opacity-100 transition">
+            <!-- Actions -->
+            <div class="absolute top-3 right-3">
 
-                <!-- Rename -->
-                <a href="{% url 'edit_folder' folder.id %}"
-                onclick="event.stopPropagation();"
-                class="px-2 py-1 text-xs font-medium text-blue-400
-                        rounded hover:bg-gray-700 hover:text-blue-300 transition">
-                    Rename
-                </a>
+                <!-- Desktop Actions (hover) -->
+                <div class="hidden md:flex items-center gap-1
+                            bg-gray-900/80 backdrop-blur
+                            rounded-lg px-2 py-1
+                            opacity-0 group-hover:opacity-100 transition">
 
-                <!-- Delete -->
-                <form method="post"
-                    action="{% url 'delete_folder' folder.id %}"
-                    onsubmit="event.stopPropagation(); return confirm('Delete this folder and all its files?');">
-                    {% csrf_token %}
-                    <button type="submit"
-                            class="px-2 py-1 text-xs font-medium text-red-400
-                                rounded hover:bg-gray-700 hover:text-red-300 transition">
-                        Delete
+                    <a href="{% url 'edit_folder' folder.id %}"
+                    onclick="event.stopPropagation();"
+                    class="px-2 py-1 text-xs font-medium text-blue-400
+                            rounded hover:bg-gray-700 hover:text-blue-300 transition">
+                        Rename
+                    </a>
+
+                    <a href="{% url 'share_folder' folder.id %}"
+                    class="px-2 py-1 text-xs text-green-400
+                            rounded hover:bg-gray-700 transition">
+                        Share
+                    </a>
+
+                    <a href="{% url 'my_shared_links' %}"
+                    class="px-2 py-1 text-xs text-yellow-400
+                            rounded hover:bg-gray-700 transition">
+                        Manage
+                    </a>
+
+                    <form method="post"
+                        action="{% url 'delete_folder' folder.id %}"
+                        onsubmit="event.stopPropagation(); return confirm('Delete this folder and all its files?');">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="px-2 py-1 text-xs font-medium text-red-400
+                                    rounded hover:bg-gray-700 hover:text-red-300 transition">
+                            Delete
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Mobile 3-dot menu -->
+                <div class="md:hidden relative">
+                    <button type="button"
+                            onclick="toggleMenu(this)"
+                            class="p-2 rounded-full bg-gray-800 text-gray-300
+                                hover:bg-gray-700 transition">
+                        ⋮
                     </button>
-                </form>
+
+                    <div class="absolute right-0 mt-2 w-36
+                                bg-gray-800 border border-gray-700
+                                rounded-lg shadow-lg hidden z-20">
+
+                        <a href="{% url 'edit_folder' folder.id %}"
+                        class="block px-4 py-2 text-sm text-blue-400 hover:bg-gray-700">
+                            Rename
+                        </a>
+
+                        <a href="{% url 'share_folder' folder.id %}"
+                        class="block px-4 py-2 text-sm text-green-400 hover:bg-gray-700">
+                            Share
+                        </a>
+
+                        <a href="{% url 'my_shared_links' %}"
+                        class="block px-4 py-2 text-sm text-yellow-400 hover:bg-gray-700">
+                            Manage
+                        </a>
+
+                        <form method="post"
+                            action="{% url 'delete_folder' folder.id %}"
+                            onsubmit="return confirm('Delete this folder and all its files?');">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="w-full text-left px-4 py-2
+                                        text-sm text-red-400 hover:bg-gray-700">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
 
             </div>
+
 
 
         </div>
@@ -96,5 +176,28 @@
     {% endfor %}
 
 </div>
+
+<script>
+function toggleMenu(btn) {
+    const menu = btn.nextElementSibling;
+
+    // close other open menus
+    document.querySelectorAll('.md\\:hidden .absolute').forEach(m => {
+        if (m !== menu) m.classList.add('hidden');
+    });
+
+    menu.classList.toggle('hidden');
+}
+
+// close menu on outside click
+document.addEventListener('click', function (e) {
+    document.querySelectorAll('.md\\:hidden .absolute').forEach(menu => {
+        if (!menu.parentElement.contains(e.target)) {
+            menu.classList.add('hidden');
+        }
+    });
+});
+</script>
+
 
 {% endblock %}

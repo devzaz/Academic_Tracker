@@ -55,3 +55,28 @@ def get_general_category(user):
         name="General"
     )
     return category
+
+
+#file sharing system
+
+import zipfile
+from io import BytesIO
+from django.core.files.base import ContentFile
+
+def create_folder_zip(folder):
+    buffer = BytesIO()
+
+    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
+        for f in folder.files.all():
+            # 🔥 STORAGE-SAFE FILE READ
+            f.file.open("rb")
+            try:
+                zipf.writestr(
+                    f.display_name or f.original_name,
+                    f.file.read()
+                )
+            finally:
+                f.file.close()
+
+    buffer.seek(0)
+    return ContentFile(buffer.read())
