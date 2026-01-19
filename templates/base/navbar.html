@@ -1,15 +1,29 @@
-<header class="h-16 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-6">
-    <h1 class="text-lg font-semibold">Dashboard</h1>
+<header class="h-16 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4 sm:px-6">
+
+    <div class="flex items-center gap-3">
+        <!-- Mobile menu button -->
+        <button
+            type="button"
+            onclick="toggleSidebar()"
+            class="flex md:hidden text-gray-300 text-2xl">
+            ☰
+        </button>
+
+
+        <h1 class="text-lg font-semibold">
+            Dashboard
+        </h1>
+    </div>
 
     <div class="flex items-center gap-4">
-        <span class="text-sm text-gray-300">
+        <span class="text-sm text-gray-300 hidden sm:block">
             {{ request.user.username }}
         </span>
 
         <form method="post" action="{% url 'logout' %}">
             {% csrf_token %}
             <button type="submit"
-                class="text-red-400 hover:text-red-300 text-sm font-medium">
+                    class="text-red-400 hover:text-red-300 text-sm font-medium">
                 Logout
             </button>
         </form>

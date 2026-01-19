@@ -312,7 +312,8 @@ class SignupForm(UserCreationForm):
             }),
             'dob': forms.DateInput(attrs={
                 'type': 'date',
-                'class': 'w-full px-4 py-2 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600'
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600',
+                'placeholder': 'Enter your date of birth'
             }),
         }
 # class SignupForm(UserCreationForm):

@@ -1,101 +1,83 @@
-<aside class="w-64 bg-gray-800 border-r border-gray-700 hidden md:block">
-    <div class="p-6 text-xl font-bold">
+<aside id="sidebar"
+class="fixed inset-y-0 left-0 z-40 w-64 bg-gray-800 border-r border-gray-700
+hidden md:block md:static
+transform md:translate-x-0 -translate-x-full
+transition-transform duration-300">
+
+    <!-- Logo -->
+    <div class="p-6 text-xl font-bold border-b border-gray-700">
         🎓 Tracker
     </div>
 
-    <nav class="px-4 space-y-2">
-        <a href="{% url 'dashboard' %}"
-           class="block px-4 py-2 rounded hover:bg-gray-700">
-           Dashboard
+    <!-- Navigation -->
+    <nav class="px-4 py-4 space-y-1 overflow-y-auto h-[calc(100%-4.5rem)]">
+
+        <a href="{% url 'dashboard' %}" class="block px-4 py-2 rounded hover:bg-gray-700">
+            Dashboard
         </a>
 
-        <a href="{% url 'tomorrow_classes' %}"
-            class="block px-4 py-2 rounded hover:bg-gray-700">
+        <a href="{% url 'tomorrow_classes' %}" class="block px-4 py-2 rounded hover:bg-gray-700">
             Tomorrow’s Classes
-         </a>
+        </a>
 
-         <a href="{% url 'mark_attendance' %}"
-            class="block px-4 py-2 rounded hover:bg-gray-700">
+        <a href="{% url 'mark_attendance' %}" class="block px-4 py-2 rounded hover:bg-gray-700">
             Mark Attendance
-         </a>
+        </a>
 
-         <a href="{% url 'assessment_list' %}"
-            class="block px-4 py-2 rounded hover:bg-gray-700">
-            Exam Planner
-         </a>
-
-         <a href="{% url 'attendance_stats' %}"
-            class="block px-4 py-2 rounded hover:bg-gray-700">
-            Attendance Stats
-         </a>
-
-         <a href="{% url 'smart_attendance' %}"
-            class="block px-4 py-2 rounded hover:bg-gray-700">
+        <a href="{% url 'smart_attendance' %}" class="block px-4 py-2 rounded hover:bg-gray-700">
             Smart Attendance
-         </a>
+        </a>
 
-         <a href="{% url 'class_history_courses' %}"
-            class="block px-4 py-2 rounded hover:bg-gray-700">
+        <a href="{% url 'class_history_courses' %}" class="block px-4 py-2 rounded hover:bg-gray-700">
             Class History
-         </a>
+        </a>
 
-         <a href="{% url 'academic_calendar' %}"
-            class="block px-4 py-2 rounded hover:bg-gray-700">
+        <a href="{% url 'assessment_list' %}" class="block px-4 py-2 rounded hover:bg-gray-700">
+            Exam Planner
+        </a>
+
+        <a href="{% url 'attendance_stats' %}" class="block px-4 py-2 rounded hover:bg-gray-700">
+            Attendance Stats
+        </a>
+
+        <a href="{% url 'academic_calendar' %}" class="block px-4 py-2 rounded hover:bg-gray-700">
             Events & Holidays
-         </a>
-
-
-
-        <a href="{% url 'semester_list' %}"
-           class="block px-4 py-2 rounded hover:bg-gray-700">
-           Semesters
         </a>
 
-        <a href="{% url 'course_list' %}"
-           class="block px-4 py-2 rounded hover:bg-gray-700">
-           Courses
+        <a href="{% url 'semester_list' %}" class="block px-4 py-2 rounded hover:bg-gray-700">
+            Semesters
         </a>
 
-         <a href="{% url 'marks_overview' %}"
-            class="block px-4 py-2 rounded hover:bg-gray-700">
+        <a href="{% url 'course_list' %}" class="block px-4 py-2 rounded hover:bg-gray-700">
+            Courses
+        </a>
+
+        <a href="{% url 'marks_overview' %}" class="block px-4 py-2 rounded hover:bg-gray-700">
             Marks
-         </a>
+        </a>
 
-         <a href="{% url 'file_hub' %}"
-            class="block px-4 py-2 rounded hover:bg-gray-700">
+        <a href="{% url 'file_hub' %}" class="block px-4 py-2 rounded hover:bg-gray-700">
             Files
-         </a>
+        </a>
 
-         <!-- {% if request.user.is_superuser %}
+        {% if request.user.is_superuser %}
+        <!-- Admin section -->
+        <div class="mt-4 border-t border-gray-700 pt-4">
+            <p class="px-4 text-xs uppercase tracking-wider text-gray-400 mb-2">
+                Admin
+            </p>
+
             <a href="{% url 'approve_users' %}"
                class="block px-4 py-2 rounded hover:bg-gray-700 text-yellow-400">
-               User Approvals
+                👤 User Approvals
             </a>
-         {% endif %} -->
 
-         {% if request.user.is_superuser %}
-            <div class="mt-4 border-t border-gray-700 pt-4">
-               <p class="px-4 text-xs uppercase tracking-wider text-gray-400 mb-2">
-                  Admin
-               </p>
+            <a href="{% url 'admin_shared_links' %}"
+               class="block px-4 py-2 rounded hover:bg-gray-700 text-red-400">
+                🧹 Shared Files
+            </a>
+        </div>
+        {% endif %}
 
-               <a href="{% url 'approve_users' %}"
-                  class="block px-4 py-2 rounded hover:bg-gray-700 text-yellow-400">
-                  👤 User Approvals
-               </a>
-
-               <a href="{% url 'admin_shared_links' %}"
-                  class="block px-4 py-2 rounded hover:bg-gray-700 text-red-400">
-               🧹 Shared Files
-               </a>
-            </div>
-         {% endif %}
-
-
-
-
-
-
-        
     </nav>
 </aside>

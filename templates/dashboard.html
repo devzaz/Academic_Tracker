@@ -1,34 +1,36 @@
 {% extends 'base/base.html' %}
 
+{% block title %}Dashboard{% endblock %}
+
 {% block content %}
 
 <!-- ================= TOP STATS ================= -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
 
-    <div class="bg-gray-800 p-5 rounded">
+    <div class="bg-gray-800 p-5 rounded-lg">
         <p class="text-sm text-gray-400">Overall Attendance</p>
-        <p class="text-3xl font-bold">
+        <p class="text-3xl font-bold mt-1">
             {{ overall_percentage }}%
         </p>
     </div>
 
-    <div class="bg-gray-800 p-5 rounded">
+    <div class="bg-gray-800 p-5 rounded-lg">
         <p class="text-sm text-gray-400">Total Courses</p>
-        <p class="text-3xl font-bold">
+        <p class="text-3xl font-bold mt-1">
             {{ course_data|length }}
         </p>
     </div>
 
-    <div class="bg-gray-800 p-5 rounded">
+    <div class="bg-gray-800 p-5 rounded-lg">
         <p class="text-sm text-gray-400">Active Semester</p>
-        <p class="text-lg font-semibold">
+        <p class="text-lg font-semibold mt-2">
             {{ active_semester.name|default:"None" }}
         </p>
     </div>
 
-    <div class="bg-gray-800 p-5 rounded">
+    <div class="bg-gray-800 p-5 rounded-lg">
         <p class="text-sm text-gray-400">Semester Courses</p>
-        <p class="text-3xl font-bold">
+        <p class="text-3xl font-bold mt-1">
             {{ semester_courses }}
         </p>
     </div>
@@ -36,12 +38,15 @@
 </div>
 
 <!-- ================= ATTENDANCE CHART ================= -->
-<div class="bg-gray-800 p-6 rounded mb-8">
+<div class="bg-gray-800 p-4 sm:p-6 rounded-lg mb-8">
     <h2 class="text-lg font-semibold mb-4">
         Attendance Overview
     </h2>
 
-    <canvas id="attendanceChart" height="120"></canvas>
+    <!-- Chart container (prevents overflow on mobile) -->
+    <div class="relative w-full overflow-x-auto">
+        <canvas id="attendanceChart" class="w-full min-h-[250px]"></canvas>
+    </div>
 </div>
 
 <!-- ================= COURSE ATTENDANCE ================= -->
@@ -49,107 +54,113 @@
     Course Attendance
 </h2>
 
-<div class="grid md:grid-cols-2 gap-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
     {% for c in course_data %}
-        <div class="bg-gray-800 p-5 rounded border
-            {% if c.warning %}
-                border-red-500
-            {% else %}
-                border-gray-700
-            {% endif %}
-        ">
-            <div class="flex justify-between mb-2">
-                <h3 class="font-semibold">
-                    {{ c.course.name }}
-                </h3>
-                <span class="text-sm">
-                    {{ c.percentage }}%
-                </span>
-            </div>
+    <div class="bg-gray-800 p-5 rounded-lg border
+        {% if c.warning %}
+            border-red-500
+        {% else %}
+            border-gray-700
+        {% endif %}
+    ">
 
-            <div class="bg-gray-700 h-2 rounded">
-                <div
-                    class="h-2 rounded
-                        {% if c.warning %}
-                            bg-red-500
-                        {% else %}
-                            bg-blue-500
-                        {% endif %}
-                    "
-                    style="width: {{ c.percentage }}%">
-                </div>
-            </div>
-
-            <p class="text-sm text-gray-400 mt-2">
-                {{ c.attended }} / {{ c.total }} classes attended
-            </p>
-
-            {% if c.warning %}
-                <p class="text-sm text-red-400 mt-1">
-                    ⚠ Below 75% attendance
-                </p>
-            {% endif %}
+        <div class="flex justify-between items-center mb-2">
+            <h3 class="font-semibold truncate">
+                {{ c.course.name }}
+            </h3>
+            <span class="text-sm font-medium">
+                {{ c.percentage }}%
+            </span>
         </div>
-    {% empty %}
-        <p class="text-gray-400">
-            No courses found.
+
+        <!-- Progress bar -->
+        <div class="bg-gray-700 h-2 rounded overflow-hidden">
+            <div
+                class="h-2 rounded
+                {% if c.warning %}
+                    bg-red-500
+                {% else %}
+                    bg-blue-500
+                {% endif %}
+                "
+                style="width: {{ c.percentage }}%">
+            </div>
+        </div>
+
+        <p class="text-sm text-gray-400 mt-2">
+            {{ c.attended }} / {{ c.total }} classes attended
         </p>
+
+        {% if c.warning %}
+        <p class="text-sm text-red-400 mt-1">
+            ⚠ Below 75% attendance
+        </p>
+        {% endif %}
+
+    </div>
+    {% empty %}
+    <p class="text-gray-400">
+        No courses found.
+    </p>
     {% endfor %}
+
 </div>
 
 <!-- ================= CHART SCRIPT ================= -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    const ctx = document.getElementById('attendanceChart');
+const ctx = document.getElementById('attendanceChart');
 
-    const attendanceChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: [
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: [
+            {% for c in course_data %}
+                "{{ c.course.name }}",
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'Attendance %',
+            data: [
                 {% for c in course_data %}
-                    "{{ c.course.name }}",
+                    {{ c.percentage }},
                 {% endfor %}
             ],
-            datasets: [{
-                label: 'Attendance %',
-                data: [
-                    {% for c in course_data %}
-                        {{ c.percentage }},
-                    {% endfor %}
-                ],
-                backgroundColor: [
-                    {% for c in course_data %}
-                        {% if c.warning %}
-                            'rgba(239, 68, 68, 0.7)',
-                        {% else %}
-                            'rgba(59, 130, 246, 0.7)',
-                        {% endif %}
-                    {% endfor %}
-                ],
-                borderRadius: 6
-            }]
+            backgroundColor: [
+                {% for c in course_data %}
+                    {% if c.warning %}
+                        'rgba(239, 68, 68, 0.7)',
+                    {% else %}
+                        'rgba(59, 130, 246, 0.7)',
+                    {% endif %}
+                {% endfor %}
+            ],
+            borderRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
         },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    ticks: {
-                        callback: function(value) {
-                            return value + '%';
-                        }
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100,
+                ticks: {
+                    callback: function(value) {
+                        return value + '%';
                     }
                 }
             }
         }
-    });
+    }
+});
 </script>
 
 {% endblock %}
