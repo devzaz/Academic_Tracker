@@ -36,12 +36,6 @@ You can try the application here:
 
 ---
 
-## 📸 Screenshots
-
-*(Add screenshots of your app here if available)*
-
-```
-![App Screenshot](screenshot.png)
 ```
 
 ---
@@ -51,7 +45,7 @@ You can try the application here:
 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/acadex.git
+git clone https://github.com/devzaz/Academic_Tracker.git
 ```
 
 2. Go to the project folder
