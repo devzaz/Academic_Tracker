@@ -2,6 +2,15 @@ from .models import ClassSession
 
 from .models import FileCategory
 
+from .models import Semester
+
+from .models import Course
+
+from .models import ClassSession
+
+
+
+
 def attendance_summary(course):
     session = ClassSession.objects.filter(course=course)
 
@@ -80,3 +89,65 @@ def create_folder_zip(folder):
 
     buffer.seek(0)
     return ContentFile(buffer.read())
+
+
+
+def get_active_semester(user):
+    """
+    Returns the currently active semester
+    for the given user.
+
+    Returns None if no semester is active.
+    """
+    return (
+        Semester.objects
+        .filter(
+            user=user,
+            is_active=True
+        )
+        .order_by("-start_date")
+        .first()
+    )
+
+
+
+def get_active_courses(user):
+    """
+    Returns all courses belonging to the user's
+    currently active semester.
+    """
+
+    active_semester = get_active_semester(user)
+
+    if not active_semester:
+        return Course.objects.none()
+
+    return (
+        Course.objects
+        .filter(
+            user=user,
+            semester=active_semester
+        )
+        .order_by("course_code")
+    )
+
+
+def get_active_sessions(user):
+    """
+    Returns all class sessions belonging
+    to the active semester.
+    """
+
+    active_semester = get_active_semester(user)
+
+    if not active_semester:
+        return ClassSession.objects.none()
+
+    return (
+        ClassSession.objects
+        .filter(
+            user=user,
+            course__semester=active_semester
+        )
+        .select_related("course")
+    )

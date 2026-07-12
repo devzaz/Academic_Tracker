@@ -13,6 +13,12 @@
         <h1 class="text-lg font-semibold">
             Dashboard
         </h1>
+
+        {% if active_semester %}
+            <p class="text-xs text-gray-400">
+                {{ active_semester.name }}
+            </p>
+        {% endif %}
     </div>
 
     <div class="flex items-center gap-4">

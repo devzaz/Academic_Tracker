@@ -60,16 +60,13 @@ class CourseForm(forms.ModelForm):
     class Meta:
         model = Course
         fields = [
-            'semester',
             'name',
             'course_code',
             'teacher_name',
             'total_class_planned'
         ]
         widgets = {
-            'semester': forms.Select(attrs={
-                'class': BASE_INPUT_CLASSES
-            }),
+            
             'name': forms.TextInput(attrs={
                 'class': BASE_INPUT_CLASSES,
                 'placeholder': 'e.g. Data Structures'

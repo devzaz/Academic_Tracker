@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 
+from django.db import models, transaction
+
 class User(AbstractUser):
     email = models.EmailField(unique=True)
 
@@ -42,6 +44,19 @@ class Semester(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+
+            if self.is_active:
+                Semester.objects.filter(
+                    user=self.user,
+                    is_active=True
+                ).exclude(pk=self.pk).update(
+                    is_active=False
+                )
+
+            super().save(*args, **kwargs)
         
 class Course(models.Model):
     user = models.ForeignKey(

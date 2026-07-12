@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 from django.shortcuts import render, redirect, get_object_or_404
 from urllib3 import request
@@ -38,7 +39,9 @@ from .utils import (
     attendance_summary, 
     missable_classes, 
     get_general_category,
-    create_folder_zip
+    create_folder_zip,
+    get_active_semester,
+    get_active_courses,
     )
 
 from django.utils import timezone
@@ -82,7 +85,24 @@ def approve_user(request, user_id):
 
 @login_required
 def dashboard(request):
-    courses = Course.objects.filter(user=request.user)
+    
+    active_semester = get_active_semester(request.user)
+    if not active_semester:
+        return render(
+            request,
+            "dashboard.html",
+            {
+                "active_semester": None,
+                "course_data": [],
+                "overall_percentage": 0,
+                "semester_courses": 0,
+            },
+        )
+    # courses = Course.objects.filter(
+    #         user=request.user,
+    #         semester=active_semester
+    #     )
+    courses = get_active_courses(request.user)
 
     total_attended = 0
     total_effective = 0
@@ -108,13 +128,10 @@ def dashboard(request):
     )
 
     # Active semester summary
-    active_semester = Semester.objects.filter(
-        user=request.user,
-        is_active=True
-    ).first()
+    # active_semester = get_active_semester(request.user)
 
     semester_courses = (
-        active_semester.courses.count()
+        courses.count()
         if active_semester else 0
     )
 
@@ -181,17 +198,44 @@ def semester_delete(request, pk):
 
 @login_required
 def course_list(request):
-    courses = Course.objects.filter(user=request.user)
+    active_semester = get_active_semester(request.user)
+
+    if not active_semester:
+        messages.warning(
+            request,
+            "Please create and activate a semester first."
+        )
+        return redirect("semester_list")
+
+    # courses = Course.objects.filter(
+    #     user=request.user,
+    #     semester=active_semester
+    # )
+    courses = get_active_courses(request.user)
+
     return render(request, 'course/list.html', {'courses': courses})
 
 @login_required
 def course_create(request):
-    form =CourseForm(request.POST or None)
-    form.fields['semester'].queryset = Semester.objects.filter(user=request.user)
+    active_semester = get_active_semester(request.user)
+
+    if not active_semester:
+        messages.error(
+            request,
+            "Create an active semester first."
+        )
+        return redirect("semester_list")
+
+    form = CourseForm(request.POST or None)
+
     if form.is_valid():
         course = form.save(commit=False)
+
         course.user = request.user
+        course.semester = active_semester
+
         course.save()
+
         return redirect('course_list')
     return render(request, 'course/form.html', {'form': form})
 
@@ -206,8 +250,21 @@ def course_delete(request, pk):
 @login_required
 def plan_class(request):
     form = ClassSessionForm(request.POST or None)
-    form.fields['course'].queryset = Course.objects.filter(user=request.user)
+    active_semester = get_active_semester(request.user)
 
+    if not active_semester:
+        messages.error(
+            request,
+            "Please create and activate a semester first."
+        )
+        return redirect("semester_list")
+
+    # form.fields["course"].queryset = Course.objects.filter(
+    #     user=request.user,
+    #     semester=active_semester
+    # )
+
+    form.fields["course"].queryset = get_active_courses(request.user)
     if form.is_valid():
         session = form.save(commit=False)
         session.user = request.user
@@ -217,44 +274,147 @@ def plan_class(request):
     return render(request, 'class_session/form.html', {'form': form})
 
 
+# @login_required
+# def tomorrow_classes(request):
+#     tomorrow = date.today() + timedelta(days=1)
+#     sessions = ClassSession.objects.filter(
+#         user=request.user,
+#         date=tomorrow
+#     )
+
+#     return render(request, 'class_session/tomorrow.html', {
+#         'sessions': sessions,
+#         'tomorrow': tomorrow
+#     })
+
 @login_required
 def tomorrow_classes(request):
     tomorrow = date.today() + timedelta(days=1)
-    sessions = ClassSession.objects.filter(
-        user=request.user,
-        date=tomorrow
+
+    active_semester = get_active_semester(request.user)
+
+    if not active_semester:
+        messages.warning(
+            request,
+            "Please create and activate a semester first."
+        )
+        return redirect("semester_list")
+
+    sessions = (
+        ClassSession.objects
+        .filter(
+            user=request.user,
+            date=tomorrow,
+            status="planned",
+            course__semester=active_semester,
+        )
+        .select_related("course")
+        .order_by("start_time")
     )
 
-    return render(request, 'class_session/tomorrow.html', {
-        'sessions': sessions,
-        'tomorrow': tomorrow
+    return render(request, "class_session/tomorrow.html", {
+        "sessions": sessions,
+        "tomorrow": tomorrow,
+        "active_semester": active_semester,
     })
+
+# @login_required
+# def edit_class_session(request, pk):
+#     session = get_object_or_404(ClassSession, pk=pk, user=request.user)
+
+#     if session.status != 'planned':
+#         return redirect('tomorrow_classes')
+
+#     form = ClassSessionForm(request.POST or None, instance=session)
+#     form.fields['course'].queryset = Course.objects.filter(user=request.user)
+
+#     if form.is_valid():
+#         form.save()
+#         return redirect('tomorrow_classes')
+
+#     return render(request, 'class_session/form.html', {'form': form})
+
 
 @login_required
 def edit_class_session(request, pk):
-    session = get_object_or_404(ClassSession, pk=pk, user=request.user)
+    active_semester = get_active_semester(request.user)
 
-    if session.status != 'planned':
-        return redirect('tomorrow_classes')
+    if not active_semester:
+        messages.error(
+            request,
+            "Please create and activate a semester first."
+        )
+        return redirect("semester_list")
+
+    session = get_object_or_404(
+        ClassSession,
+        pk=pk,
+        user=request.user,
+        course__semester=active_semester,
+    )
+
+    if session.status != "planned":
+        return redirect("tomorrow_classes")
 
     form = ClassSessionForm(request.POST or None, instance=session)
-    form.fields['course'].queryset = Course.objects.filter(user=request.user)
+
+    # Only active semester courses
+    # form.fields["course"].queryset = Course.objects.filter(
+    #     user=request.user,
+    #     semester=active_semester,
+    # )
+    form.fields["course"].queryset = get_active_courses(request.user)
 
     if form.is_valid():
-        form.save()
-        return redirect('tomorrow_classes')
+        updated_session = form.save(commit=False)
 
-    return render(request, 'class_session/form.html', {'form': form})
+        # Extra security check
+        if updated_session.course.semester != active_semester:
+            messages.error(
+                request,
+                "You cannot assign a class to another semester."
+            )
+            return redirect("tomorrow_classes")
+
+        updated_session.save()
+
+        return redirect("tomorrow_classes")
+
+    return render(
+        request,
+        "class_session/form.html",
+        {
+            "form": form,
+            "session": session,
+            "active_semester": active_semester,
+        },
+    )
+
 
 @login_required
 def mark_attendance(request):
     today = date.today()
 
-    sessions = ClassSession.objects.filter(
-        user = request.user,
-        date__lte = today,
-        status = 'planned'
-    ).order_by('-date', '-start_time')
+    active_semester = get_active_semester(request.user)
+
+    if not active_semester:
+        messages.warning(
+            request,
+            "Please activate a semester first."
+        )
+        return redirect("semester_list")
+
+    sessions = (
+        ClassSession.objects
+        .filter(
+            user=request.user,
+            date__lte=today,
+            status="planned",
+            course__semester=active_semester,
+        )
+        .select_related("course")
+        .order_by("-date", "-start_time")
+    )
 
     context ={
         'sessions': sessions,
@@ -291,11 +451,14 @@ def update_attendance_status(request, pk):
     if status not in ['completed', 'absent', 'cancelled', 'no_attendance']:
         return redirect('mark_attendance')
 
+    active_semester = get_active_semester(request.user)
+
     session = get_object_or_404(
         ClassSession,
         pk=pk,
         user=request.user,
-        status='planned'
+        status="planned",
+        course__semester=active_semester,
     )
 
     session.status = status
@@ -307,7 +470,12 @@ def update_attendance_status(request, pk):
 
 @login_required
 def course_attendance_stats(request):
-    courses = Course.objects.filter(user=request.user)
+    active_semester = get_active_semester(request.user)
+
+    courses = Course.objects.filter(
+        user=request.user,
+        semester=active_semester
+    )
 
     stats = []
     for course in courses:
@@ -337,7 +505,12 @@ def course_attendance_stats(request):
 
 @login_required
 def smart_attendance(request):
-    courses = Course.objects.filter(user=request.user)
+    active_semester = get_active_semester(request.user)
+
+    courses = Course.objects.filter(
+        user=request.user,
+        semester=active_semester
+    )
 
     data = []
     for course in courses:
@@ -356,7 +529,7 @@ def smart_attendance(request):
 
 @login_required
 def marks_overview(request):
-    courses = Course.objects.filter(user=request.user)
+    courses = get_active_courses(request.user)
     
     data = []
 
@@ -371,16 +544,36 @@ def marks_overview(request):
             'mark': mark
         })
 
-    return render(request, 'marks/overview.html', {'data': data})
+    return render(request, "marks/overview.html", {
+        "data": data,
+        "active_semester": get_active_semester(request.user),
+    })
 
 
 @login_required
 def edit_marks(request, course_id):
+    # course = get_object_or_404(
+    #     Course,
+    #     id=course_id,
+    #     user=request.user
+    # )
+    active_semester = get_active_semester(request.user)
+
     course = get_object_or_404(
         Course,
         id=course_id,
-        user=request.user
+        user=request.user,
+        semester=active_semester,
     )
+
+    # Testing
+    active_courses = get_active_courses(request.user)
+
+    if not active_courses.exists():
+        messages.info(
+            request,
+            "No courses found in the active semester."
+        )
 
     mark, _ = CourseMark.objects.get_or_create(
         user=request.user,
@@ -599,9 +792,17 @@ def course_edit(request, pk):
 
 @login_required
 def assessment_edit(request, pk):
+    # assessment = get_object_or_404(
+    #     Assessment, pk=pk, user=request.user
+    # )
+
     assessment = get_object_or_404(
-        Assessment, pk=pk, user=request.user
+        Assessment,
+        pk=pk,
+        user=request.user,
+        course__semester=get_active_semester(request.user),
     )
+
     form = AssessmentForm(request.POST or None, instance=assessment)
     form.fields['course'].queryset = Course.objects.filter(
         user=request.user
@@ -650,7 +851,9 @@ def class_history_detail(request, course_id):
 @login_required
 def assessment_create(request):
     form = AssessmentForm(request.POST or None)
-    form.fields['course'].queryset = Course.objects.filter(user=request.user)
+    # form.fields['course'].queryset = Course.objects.filter(user=request.user)
+
+    form.fields["course"].queryset = get_active_courses(request.user)
 
     if form.is_valid():
         assessment = form.save(commit=False)
@@ -666,9 +869,22 @@ def assessment_list(request):
     today = date.today()
     warning_date = today + timedelta(days=5)
 
-    assessments = Assessment.objects.filter(
-        user=request.user
-    ).order_by('date')
+    # assessments = Assessment.objects.filter(
+    #     user=request.user
+    # ).order_by('date')
+
+    active_semester = get_active_semester(request.user)
+
+    assessments = (
+        Assessment.objects
+        .filter(
+            user=request.user,
+            # course__semester=active_semester
+            course__semester=get_active_semester(request.user)
+        )
+        .select_related("course")
+        .order_by("date")
+    )
 
     data = []
     for a in assessments:
@@ -695,7 +911,7 @@ def academic_calendar(request):
         })
 
     # 🔴 Exams
-    for a in Assessment.objects.filter(user=request.user):
+    for a in Assessment.objects.filter(user=request.user, course__semester=get_active_semester(request.user)):
         events.append({
             'title': f"{a.course.name} — {a.get_type_display()}",
             'start': a.date.isoformat(),
